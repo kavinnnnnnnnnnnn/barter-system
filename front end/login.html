@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login | Barter System</title>
+  <style>
+    body{
+      height:100vh; display:flex; justify-content:center; align-items:center;
+      background:linear-gradient(135deg,#43cea2,#185a9d);
+      font-family:Segoe UI; color:#fff;
+    }
+    .box{
+      background:rgba(255,255,255,.15);
+      padding:30px; border-radius:16px; width:320px;
+      backdrop-filter:blur(12px); text-align:center;
+    }
+    input,button{
+      width:100%; padding:12px; margin:8px 0;
+      border:none; border-radius:8px;
+    }
+    button{background:#f9d423; font-weight:bold;}
+    a{color:#ffd;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>User Login</h2>
+  <form onsubmit="loginUser(event)">
+    <input type="email" id="loginEmail" placeholder="Email" required>
+    <input type="password" id="loginPassword" placeholder="Password" required>
+    <button>Login</button>
+  </form>
+  <p>New user? <a href="register.html">Register</a></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

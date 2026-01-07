@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register | Barter System</title>
+  <style>
+    body{
+      height:100vh; display:flex; justify-content:center; align-items:center;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      font-family:Segoe UI; color:#fff;
+    }
+    .box{
+      background:rgba(255,255,255,.15);
+      padding:30px; border-radius:16px; width:320px;
+      backdrop-filter:blur(12px); text-align:center;
+    }
+    input,button{
+      width:100%; padding:12px; margin:8px 0;
+      border:none; border-radius:8px;
+    }
+    button{background:#00f2fe; font-weight:bold;}
+    a{color:#ffd;}
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Create Account</h2>
+  <form onsubmit="registerUser(event)">
+    <input type="email" id="regEmail" placeholder="Email" required>
+    <input type="password" id="regPassword" placeholder="Password" required>
+    <button>Register</button>
+  </form>
+  <p>Already registered? <a href="login.html">Login</a></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
