@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard | Barter System</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #0a0e27 0%, #1a0033 50%, #0d1b2a 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+    
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 0 30px rgba(100, 200, 255, 0.5), 0 0 60px rgba(30, 144, 255, 0.3);
+      background: #252525;
+    }
+    
+    .card img {
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    
+    .card img:hover {
+      transform: scale(1.08);
+    }
+    
+    #bg-container {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .particle {
+      position: absolute;
+      font-size: 18px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    
+    #cursor-star {
+      position: fixed;
+      pointer-events: none;
+      font-size: 24px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+    
+    /* 💧 WATER RIPPLE EFFECT */
+    .water-ripple {
+      position: fixed;
+      border: 2px solid rgba(100, 200, 255, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      animation: ripple 0.8s ease-out;
+    }
+    
+    @keyframes ripple {
+      0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+      }
+      100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+      }
+    }
+    
+    /* ❄️ SNOWFLAKE */
+    .snowflake {
+      position: fixed;
+      font-size: 20px;
+      z-index: 999;
+      pointer-events: none;
+      animation: snowfall linear;
+    }
+    
+    @keyframes snowfall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) translateX(50px) rotate(360deg);
+      }
+    }
+    
+    /* 🔘 BUTTON HOVER */
+    .btn {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(100, 200, 255, 0.4);
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    /* 🔍 SEARCH BAR GEL EFFECT */
+    .search-container {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform: scale(0.95);
+    }
+
+    .search-container:hover {
+      transform: scale(1.05);
+    }
+
+    .search-bar-gel {
+      background: rgba(100, 200, 255, 0.1) !important;
+      border: 2px solid rgba(100, 200, 255, 0.3) !important;
+      backdrop-filter: blur(10px);
+      border-radius: 25px !important;
+      padding: 8px 15px !important;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar-gel:focus {
+      background: rgba(100, 200, 255, 0.2) !important;
+      border-color: rgba(100, 200, 255, 0.6) !important;
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0.4), inset 0 0 10px rgba(100, 200, 255, 0.2);
+    }
+
+    .search-input-group {
+      background: rgba(100, 200, 255, 0.08);
+      border: 2px solid rgba(100, 200, 255, 0.25);
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      padding: 5px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .search-input-group:hover {
+      background: rgba(100, 200, 255, 0.12);
+      border-color: rgba(100, 200, 255, 0.4);
+      box-shadow: 0 5px 25px rgba(100, 200, 255, 0.2);
+    }
+
+    .search-input-group input {
+      background: transparent !important;
+      border: none !important;
+      color: white !important;
+      font-size: 0.95rem;
+    }
+
+    .search-input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-input-group input:focus {
+      box-shadow: none !important;
+    }
+
+    .search-btn-gel {
+      background: rgba(100, 200, 255, 0.3);
+      border: none !important;
+      border-radius: 20px;
+      color: white;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .search-btn-gel:hover {
+      background: rgba(100, 200, 255, 0.6);
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
+    }
+
+    /* 🎬 ENTRANCE ANIMATIONS */
+    @keyframes dropFromTop {
+      0% {
+        opacity: 0;
+        transform: translateY(-80px) rotateX(90deg) scale(0.8);
+        perspective: 1000px;
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg) scale(1);
+      }
+    }
+
+    @keyframes dropFromTopWithBounce {
+      0% {
+        opacity: 0;
+        transform: translateY(-100px) rotateX(90deg) scale(0.7);
+      }
+      60% {
+        transform: translateY(10px) rotateX(0deg) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg) scale(1);
+      }
+    }
+
+    @keyframes dropFromTopSpin {
+      0% {
+        opacity: 0;
+        transform: translateY(-100px) rotateY(90deg) rotateZ(180deg) scale(0.6);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateY(0deg) rotateZ(0deg) scale(1);
+      }
+    }
+
+    /* Apply entrance animations */
+    .navbar {
+      animation: dropFromTop 0.8s ease-out;
+    }
+
+    h2 {
+      animation: dropFromTopWithBounce 1s ease-out;
+    }
+
+    .search-container {
+      animation: dropFromTop 1.2s ease-out;
+    }
+
+    .information-section {
+      animation: dropFromTopSpin 1.4s ease-out;
+    }
+
+    .featured-offers-section {
+      animation: dropFromTop 1.6s ease-out;
+    }
+
+    .post-offer-section {
+      animation: dropFromTopSpin 1.6s ease-out;
+    }
+
+    .promotional-banner {
+      animation: dropFromTopWithBounce 1.8s ease-out;
+    }
+
+    .benefits-section {
+      animation: dropFromTop 2s ease-out;
+    }
+
+    /* Stagger effect for cards */
+    .featured-card {
+      animation: dropFromTopWithBounce 1.2s ease-out backwards;
+    }
+
+    .featured-card:nth-child(1) { animation-delay: 1.8s; }
+    .featured-card:nth-child(2) { animation-delay: 2s; }
+    .featured-card:nth-child(3) { animation-delay: 2.2s; }
+    .featured-card:nth-child(4) { animation-delay: 2.4s; }
+
+    .benefit-card {
+      animation: dropFromTopSpin 1s ease-out backwards;
+    }
+
+    .benefit-card:nth-child(1) { animation-delay: 2.2s; }
+    .benefit-card:nth-child(2) { animation-delay: 2.4s; }
+    .benefit-card:nth-child(3) { animation-delay: 2.6s; }
+    .benefit-card:nth-child(4) { animation-delay: 2.8s; }
+  </style>
+</head>
+
+<body>
+
+<div id="bg-container"></div>
+
+<script>
+/* 🔐 LOGIN PROTECTION */
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) window.location.href = "login.html";
+</script>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(20, 20, 40, 0.95); border-bottom: 2px solid rgba(100, 200, 255, 0.3);">
+  <div class="container-fluid">
+    <!-- Categories on Left -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="fashion.html">👗 Fashion</a></li>
+        <li class="nav-item"><a class="nav-link" href="land.html">🏠 Land</a></li>
+        <li class="nav-item"><a class="nav-link" href="gadgets.html">📱 Gadgets</a></li>
+        <li class="nav-item"><a class="nav-link" href="vehicles.html">🚗 Vehicles</a></li>
+        <li class="nav-item"><a class="nav-link" href="books.html">📚 Books</a></li>
+        <li class="nav-item"><a class="nav-link" href="other.html">🎁 Other</a></li>
+      </ul>
+
+      <!-- User Account on Right -->
+      <div class="d-flex align-items-center gap-2 position-relative">
+        <span class="text-light" id="userDisplay" style="cursor:pointer;">👤 User</span>
+        <button class="btn btn-outline-danger btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Toggle Button -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+
+<script>
+  // Display logged-in user name in navbar
+  const userDisplay = document.getElementById("userDisplay");
+  userDisplay.textContent = "👤 " + (user.name || user.email || "User");
+  userDisplay.addEventListener("click", function() {
+    window.location.href = "user.html";
+  });
+  // Logout function
+  function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  }
+</script>
+
+<div class="container mt-5">
+
+  <h2 class="text-center mb-5">🔄 Barter Syatem</h2>
+
+  <!-- SEARCH BAR (MINIMAL SIZE, CENTER TOP) -->
+  <div class="d-flex justify-content-center mb-5">
+    <div class="search-container" style="width: 100%; max-width: 320px;">
+      <div class="input-group search-input-group">
+        <input id="searchInput" type="text" class="form-control search-bar-gel" placeholder="Search offers..." onkeypress="if(event.key==='Enter') searchOffers()">
+        <button class="btn search-btn-gel" onclick="searchOffers()">🔍</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFORMATION SECTION -->
+  <div class="row mb-5 information-section">
+    <div class="col-md-12">
+      <div class="card p-4" style="background: rgba(30, 30, 48, 0.9); border: 2px solid rgba(100, 200, 255, 0.3);">
+        <h3 class="text-center mb-4">✨ Welcome to Barter System</h3>
+        <p class="text-center" style="font-size: 1.1rem; line-height: 1.8; color: rgba(255,255,255,0.9);">
+          Exchange goods and services without using money. Connect with our community and trade what you have for what you need. 
+          Whether it's fashion, gadgets, land, vehicles, books, or anything else - find the perfect barter partner today!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED OFFERS & POST OFFER SIDE BY SIDE -->
+  <div class="mb-5 featured-offers-section">
+    <div class="row g-4">
+      <!-- FEATURED OFFERS -->
+      <div class="col-lg-8">
+        <h3 class="mb-4">⭐ Featured Offers</h3>
+          <div class="row g-3" id="featuredOffersContainer">
+            <!-- Cards will be dynamically loaded here -->
+          </div>
+          <script>
+          // Modern card UI and dynamic image loading
+          const featuredOffers = [
+            {
+              title: "Vintage Fashion",
+              desc: "Premium vintage clothes",
+              img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJMSeYMOm2g3XrSqzV-6eS0W_epoHDRXpllg&s",
+              link: "fashion.html",
+              alt: "Fashion"
+            },
+            {
+              title: "Latest Tech",
+              desc: "Modern gadgets",
+              img: "https://wallpaper.forfun.com/fetch/4f/4fc0358d13fcecef6016fc03588e8467.jpeg",
+              link: "gadgets.html",
+              alt: "Gadgets"
+            },
+            {
+              title: "Prime Land",
+              desc: "Beautiful properties",
+              img: "https://t4.ftcdn.net/jpg/05/48/13/71/360_F_548137168_dSTRumaZSTQtyqvprspQiGTZTb7Mb2GR.jpg",
+              link: "land.html",
+              alt: "Land"
+            },
+            {
+              title: "Vehicles",
+              desc: "Cars & Transport",
+              img: "https://wallpapercave.com/wp/wp3090846.jpg",
+              link: "vehicles.html",
+              alt: "Vehicles"
+            }
+          ];
+
+          const container = document.getElementById('featuredOffersContainer');
+          featuredOffers.forEach((offer, idx) => {
+            const card = document.createElement('div');
+            card.className = 'col-md-6 featured-card';
+            card.innerHTML = `
+              <div class="card p-3 h-100 shadow-lg border-0" style="background: linear-gradient(135deg, rgba(100,200,255,0.12), rgba(30,144,255,0.08)); border-radius: 18px; transition: all 0.3s ease;">
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                  <img src="${offer.img}" alt="${offer.alt}" class="img-fluid" style="height: 160px; width: 100%; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 24px rgba(100,200,255,0.15);">
+                </div>
+                <h5 class="fw-bold text-primary">${offer.title}</h5>
+                <p class="small text-light">${offer.desc}</p>
+                <a href="${offer.link}" class="btn btn-sm btn-info mt-2 w-100" style="border-radius: 8px; font-weight: 500;">View More →</a>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+          </script>
+      </div>
+
+      <!-- POST OFFER SECTION (GEL EFFECT) -->
+      <div class="col-lg-4 post-offer-section">
+        <div style="background: rgba(100, 200, 255, 0.08); border: 2px solid rgba(100, 200, 255, 0.25); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; position: sticky; top: 100px; max-height: 90vh; overflow-y: auto;">
+          <h4 class="mb-4 text-center">📝 Post New Offer</h4>
+
+          <!-- CATEGORY FIELD -->
+          <div class="mb-3">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">📦 Category</label>
+            <select id="category" class="form-control" onchange="updateFileRequirements()" style="font-size: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 10px 15px;">
+              <option value="">Select a category...</option>
+              <option value="watch">⌚ Watch</option>
+              <option value="bike">🏍️ Bike/Motorcycle</option>
+              <option value="car">🚗 Car/Vehicle</option>
+              <option value="books">📚 Books</option>
+              <option value="fashion">👔 Fashion/Clothing</option>
+              <option value="gadgets">📱 Gadgets/Electronics</option>
+              <option value="land">🏠 Land/Property</option>
+              <option value="jewelry">💎 Jewelry</option>
+              <option value="other">🎁 Other</option>
+            </select>
+          </div>
+
+          <!-- NEED FIELD -->
+          <div class="mb-3">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">🔍 What You Need</label>
+            <input id="need" class="form-control" placeholder="Enter what you need..." style="font-size: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 10px 15px;">
+          </div>
+
+          <!-- OFFER FIELD -->
+          <div class="mb-3">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">💝 What You Offer</label>
+            <input id="offer" class="form-control" placeholder="Enter what you offer..." style="font-size: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 10px 15px;">
+          </div>
+
+          <!-- IMAGE FIELD -->
+          <div class="mb-3">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">🖼️ Image </label>
+            <input id="image" class="form-control" placeholder="Paste image URL (optional)..." style="font-size: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 10px 15px;">
+          </div>
+
+          <!-- PRODUCT-SPECIFIC DETAILS SECTION -->
+          <div id="productDetailsContainer" style="display: none; background: rgba(100, 200, 255, 0.08); border: 1px solid rgba(100, 200, 255, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+            <h6 class="mb-3" style="color: rgba(100, 200, 255, 0.9);">📋 Product Details</h6>
+            <div id="dynamicDetailsFields"></div>
+          </div>
+
+          <!-- DYNAMIC FILE REQUIREMENTS SECTION -->
+          <div id="fileRequirementsContainer" style="display: none;">
+            <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 10px; padding: 12px; margin-bottom: 15px;">
+              <p id="requirementsText" style="color: rgba(255, 193, 7, 0.9); font-size: 0.9rem; margin: 0;">Select a category to see document requirements</p>
+            </div>
+          </div>
+
+          <!-- FILE UPLOAD FIELDS (Certificate) -->
+          <div id="certificateContainer" class="mb-3" style="display: none;">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">📄 Original Certificate</label>
+            <input id="certificateFile" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 8px 12px;">
+            <small style="color: rgba(255,255,255,0.6);">Accepted: PDF, JPG, PNG, DOC</small>
+          </div>
+
+          <!-- FILE UPLOAD FIELDS (Proof Photos) -->
+          <div id="proofPhotosContainer" class="mb-3" style="display: none;">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">📷 Proof Photos</label>
+            <input id="proofPhotosFile" type="file" class="form-control" accept=".jpg,.jpeg,.png" multiple style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 8px 12px;">
+            <small style="color: rgba(255,255,255,0.6);">Upload multiple photos (JPG, PNG)</small>
+          </div>
+
+          <!-- FILE UPLOAD FIELDS (Insurance) -->
+          <div id="insuranceContainer" class="mb-3" style="display: none;">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">📋 Insurance Document</label>
+            <input id="insuranceFile" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 8px 12px;">
+            <small style="color: rgba(255,255,255,0.6);">Accepted: PDF, JPG, PNG, DOC</small>
+          </div>
+
+          <!-- FILE UPLOAD FIELDS (Registration) -->
+          <div id="registrationContainer" class="mb-3" style="display: none;">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">🔖 Registration Certificate</label>
+            <input id="registrationFile" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 8px 12px;">
+            <small style="color: rgba(255,255,255,0.6);">Accepted: PDF, JPG, PNG, DOC</small>
+          </div>
+
+          <!-- FILE UPLOAD FIELDS (Ownership Proof) -->
+          <div id="ownershipContainer" class="mb-4" style="display: none;">
+            <label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 8px; display: block;">🏷️ Ownership Proof</label>
+            <input id="ownershipFile" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 10px; padding: 8px 12px;">
+            <small style="color: rgba(255,255,255,0.6);">Accepted: PDF, JPG, PNG, DOC</small>
+          </div>
+
+          <button id="postBtn" onclick="postOffer()" class="btn btn-warning btn-lg w-100" style="border-radius: 12px; font-weight: 600;">
+            📤 Post Offer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMOTIONAL BANNER -->
+  <div class="mb-5 promotional-banner">
+    <div class="card p-5" style="background: linear-gradient(135deg, rgba(100, 200, 255, 0.2), rgba(30, 144, 255, 0.2)); border: 2px solid rgba(100, 200, 255, 0.4); border-radius: 15px;">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h3>🎁 Special Offers This Month</h3>
+          <p style="font-size: 1.1rem;">Get exclusive rewards when you complete 5 successful exchanges!</p>
+          <button class="btn btn-light btn-lg">Claim Reward →</button>
+        </div>
+        <div class="col-md-6 text-center">
+          <div style="font-size: 5rem;">🏆</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFITS SECTION -->
+  <div class="mb-5 benefits-section">
+    <h3 class="text-center mb-4">💡 Why Choose Barter?</h3>
+    <div class="row g-4">
+      <div class="col-md-3 col-sm-6 benefit-card">
+        <div class="text-center p-3">
+          <div style="font-size: 3rem; margin-bottom: 15px;">💰</div>
+          <h5>Save Money</h5>
+          <p class="small">Exchange without spending cash</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 benefit-card">
+        <div class="text-center p-3">
+          <div style="font-size: 3rem; margin-bottom: 15px;">🌍</div>
+          <h5>Global Community</h5>
+          <p class="small">Connect with traders worldwide</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 benefit-card">
+        <div class="text-center p-3">
+          <div style="font-size: 3rem; margin-bottom: 15px;">♻️</div>
+          <h5>Eco-Friendly</h5>
+          <p class="small">Reduce waste, reuse items</p>
+        </div>
+      </div>
+      <div class="col-md-3 col-sm-6 benefit-card">
+        <div class="text-center p-3">
+          <div style="font-size: 3rem; margin-bottom: 15px;">🤝</div>
+          <h5>Build Trust</h5>
+          <p class="small">Safe exchanges with verified users</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* 🎬 INITIALIZE AOS (ANIMATE ON SCROLL) */
+AOS.init({
+  duration: 1000,
+  once: false,
+  mirror: true,
+  offset: 100,
+  easing: 'ease-in-out'
+});
+
+/* 🔁 CATEGORY FOR REDIRECT ONLY */
+function getCategoryFromNeed(need) {
+  need = need.toLowerCase();
+
+  if (need.match(/watch|phone|mobile|laptop|speaker|earphone|headphone|tablet|camera|gadget/))
+    return "gadgets";
+  if (need.match(/car|bike|vehicle|scooter|truck/))
+    return "vehicles";
+  if (need.match(/shirt|dress|pant|jeans|shoe|clothes|fashion/))
+    return "fashion";
+  if (need.match(/land|house|plot|property|villa|apartment/))
+    return "land";
+  if (need.match(/book|novel|textbook|magazine/))
+    return "books";
+
+  return "other";
+}
+
+/* � UPDATE FILE REQUIREMENTS BASED ON CATEGORY */
+function updateFileRequirements() {
+  const category = document.getElementById("category").value;
+  const container = document.getElementById("fileRequirementsContainer");
+  const requirementsText = document.getElementById("requirementsText");
+  const detailsContainer = document.getElementById("productDetailsContainer");
+  const detailsFields = document.getElementById("dynamicDetailsFields");
+  
+  // Hide all file upload containers first
+  document.getElementById("certificateContainer").style.display = "none";
+  document.getElementById("proofPhotosContainer").style.display = "none";
+  document.getElementById("insuranceContainer").style.display = "none";
+  document.getElementById("registrationContainer").style.display = "none";
+  document.getElementById("ownershipContainer").style.display = "none";
+  
+  // Clear file inputs
+  document.getElementById("certificateFile").value = "";
+  document.getElementById("proofPhotosFile").value = "";
+  document.getElementById("insuranceFile").value = "";
+  document.getElementById("registrationFile").value = "";
+  document.getElementById("ownershipFile").value = "";
+  
+  // Clear previous detail fields
+  detailsFields.innerHTML = "";
+  
+  if (!category) {
+    container.style.display = "none";
+    detailsContainer.style.display = "none";
+    return;
+  }
+  
+  container.style.display = "block";
+  
+  // Define product-specific fields for each category
+  const productDetails = {
+    "watch": [
+      { field: "watchBrand", label: "🏷️ Brand", type: "text", placeholder: "e.g., Rolex, Omega" },
+      { field: "watchModel", label: "📝 Model", type: "text", placeholder: "e.g., Submariner" },
+      { field: "watchCondition", label: "✨ Condition", type: "select", options: ["New", "Like New", "Excellent", "Good", "Fair"] },
+      { field: "watchType", label: "⌚ Type", type: "select", options: ["Automatic", "Manual", "Quartz", "Digital"] }
+    ],
+    "bike": [
+      { field: "bikeBrand", label: "🏷️ Brand", type: "text", placeholder: "e.g., Honda, Royal Enfield" },
+      { field: "bikeModel", label: "📝 Model", type: "text", placeholder: "e.g., CB 500" },
+      { field: "bikeYear", label: "📅 Year", type: "number", placeholder: "e.g., 2020" },
+      { field: "bikeKilometers", label: "🛣️ Kilometers Run", type: "number", placeholder: "e.g., 50000" },
+      { field: "bikeCondition", label: "✨ Condition", type: "select", options: ["Excellent", "Good", "Fair", "Needs Repair"] }
+    ],
+    "car": [
+      { field: "carBrand", label: "🚙 Brand", type: "text", placeholder: "e.g., Toyota, BMW" },
+      { field: "carModel", label: "📝 Model", type: "text", placeholder: "e.g., Camry" },
+      { field: "carYear", label: "📅 Year", type: "number", placeholder: "e.g., 2018" },
+      { field: "carKilometers", label: "🛣️ Kilometers Run", type: "number", placeholder: "e.g., 75000" },
+      { field: "carFuelType", label: "⛽ Fuel Type", type: "select", options: ["Petrol", "Diesel", "CNG", "Hybrid", "Electric"] },
+      { field: "carCondition", label: "✨ Condition", type: "select", options: ["Excellent", "Good", "Fair", "Needs Repair"] }
+    ],
+    "books": [
+      { field: "bookTitle", label: "📚 Title", type: "text", placeholder: "Book title" },
+      { field: "bookAuthor", label: "✍️ Author", type: "text", placeholder: "Author name" },
+      { field: "bookGenre", label: "📖 Genre", type: "text", placeholder: "e.g., Fiction, Science" },
+      { field: "bookCondition", label: "✨ Condition", type: "select", options: ["Like New", "Good", "Fair", "Well-Read"] },
+      { field: "bookYear", label: "📅 Publication Year", type: "number", placeholder: "e.g., 2020" }
+    ],
+    "fashion": [
+      { field: "fashionType", label: "👕 Type", type: "select", options: ["Shirt", "Pants", "Dress", "Jacket", "Shoes", "Other"] },
+      { field: "fashionSize", label: "📏 Size", type: "text", placeholder: "e.g., M, L, XL" },
+      { field: "fashionBrand", label: "🏷️ Brand", type: "text", placeholder: "Brand name" },
+      { field: "fashionMaterial", label: "🧵 Material", type: "text", placeholder: "e.g., Cotton, Polyester" },
+      { field: "fashionCondition", label: "✨ Condition", type: "select", options: ["New", "Like New", "Good", "Fair", "Worn"] },
+      { field: "fashionColor", label: "🎨 Color", type: "text", placeholder: "e.g., Blue, Red" }
+    ],
+    "gadgets": [
+      { field: "gadgetBrand", label: "🏷️ Brand", type: "text", placeholder: "e.g., Apple, Samsung" },
+      { field: "gadgetModel", label: "📝 Model", type: "text", placeholder: "e.g., iPhone 13" },
+      { field: "gadgetType", label: "📱 Type", type: "select", options: ["Smartphone", "Laptop", "Tablet", "Smartwatch", "Headphones", "Camera", "Other"] },
+      { field: "gadgetCondition", label: "✨ Condition", type: "select", options: ["New", "Like New", "Excellent", "Good", "Fair"] },
+      { field: "gadgetWarranty", label: "✅ Warranty Status", type: "select", options: ["Active", "Expired", "None"] }
+    ],
+    "land": [
+      { field: "landLocation", label: "📍 Location/City", type: "text", placeholder: "e.g., Mumbai, Delhi" },
+      { field: "landArea", label: "📐 Area (sq. ft)", type: "number", placeholder: "e.g., 5000" },
+      { field: "landType", label: "🏗️ Type", type: "select", options: ["Residential", "Commercial", "Agricultural", "Mixed"] },
+      { field: "landCondition", label: "✨ Condition", type: "select", options: ["Clear", "Disputed", "Under Mortgage", "Other"] }
+    ],
+    "jewelry": [
+      { field: "jewelryType", label: "💍 Type", type: "select", options: ["Ring", "Necklace", "Bracelet", "Earrings", "Watch", "Other"] },
+      { field: "jewelryMaterial", label: "🔗 Material", type: "select", options: ["Gold", "Silver", "Platinum", "Diamond", "Other"] },
+      { field: "jewelryWeight", label: "⚖️ Weight (grams)", type: "number", placeholder: "e.g., 25" },
+      { field: "jewelryCondition", label: "✨ Condition", type: "select", options: ["New", "Like New", "Excellent", "Good", "Fair"] },
+      { field: "jewelryPurity", label: "🎯 Purity", type: "text", placeholder: "e.g., 22K, 18K" }
+    ]
+  };
+  
+  // Show product details if available for this category
+  if (productDetails[category]) {
+    detailsContainer.style.display = "block";
+    productDetails[category].forEach(detail => {
+      const fieldId = `productDetail_${detail.field}`;
+      let fieldHTML = `<div class="mb-2">`;
+      fieldHTML += `<label class="form-label" style="color: rgba(255,255,255,0.8); font-weight: 500; font-size: 0.9rem; margin-bottom: 5px; display: block;">${detail.label}</label>`;
+      
+      if (detail.type === "select") {
+        fieldHTML += `<select id="${fieldId}" class="form-control" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 8px; padding: 8px 12px;">`;
+        fieldHTML += `<option value="">Select...</option>`;
+        detail.options.forEach(opt => {
+          fieldHTML += `<option value="${opt}">${opt}</option>`;
+        });
+        fieldHTML += `</select>`;
+      } else if (detail.type === "number") {
+        fieldHTML += `<input type="number" id="${fieldId}" class="form-control" placeholder="${detail.placeholder}" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 8px; padding: 8px 12px;">`;
+      } else {
+        fieldHTML += `<input type="text" id="${fieldId}" class="form-control" placeholder="${detail.placeholder}" style="font-size: 0.9rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(100, 200, 255, 0.3); color: white; border-radius: 8px; padding: 8px 12px;">`;
+      }
+      fieldHTML += `</div>`;
+      detailsFields.innerHTML += fieldHTML;
+    });
+  }
+  
+  // Show required files based on category
+  switch(category) {
+    case "watch":
+      requirementsText.innerHTML = "✅ Required: Original Certificate + Proof Photos";
+      document.getElementById("certificateContainer").style.display = "block";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "bike":
+      requirementsText.innerHTML = "✅ Required: Insurance + Registration + Proof Photos";
+      document.getElementById("insuranceContainer").style.display = "block";
+      document.getElementById("registrationContainer").style.display = "block";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "car":
+      requirementsText.innerHTML = "✅ Required: Insurance + Registration + Proof Photos";
+      document.getElementById("insuranceContainer").style.display = "block";
+      document.getElementById("registrationContainer").style.display = "block";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "books":
+      requirementsText.innerHTML = "✅ Required: Proof Photos";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "fashion":
+      requirementsText.innerHTML = "✅ Required: Proof Photos";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "gadgets":
+      requirementsText.innerHTML = "✅ Required: Warranty/Certificate + Proof Photos";
+      document.getElementById("certificateContainer").style.display = "block";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    case "land":
+      requirementsText.innerHTML = "✅ Required: Ownership Proof + Registration";
+      document.getElementById("ownershipContainer").style.display = "block";
+      document.getElementById("registrationContainer").style.display = "block";
+      break;
+      
+    case "jewelry":
+      requirementsText.innerHTML = "✅ Required: Certificate + Proof Photos";
+      document.getElementById("certificateContainer").style.display = "block";
+      document.getElementById("proofPhotosContainer").style.display = "block";
+      break;
+      
+    default:
+      requirementsText.innerHTML = "📝 No specific documents required";
+  }
+}
+
+/* 📤 POST OFFER WITH FILE UPLOADS */
+function postOffer() {
+  const offerText = document.getElementById("offer").value.trim();
+  const needText = document.getElementById("need").value.trim();
+  const imageText = document.getElementById("image").value.trim();
+  const category = document.getElementById("category").value;
+
+  if (!offerText || !needText) {
+    alert("❌ Please fill Offer and Need fields");
+    return;
+  }
+  
+  if (!category) {
+    alert("❌ Please select a category");
+    return;
+  }
+
+  // Validate required files based on category
+  const requiredFiles = getRequiredFiles(category);
+  for (let fileId of requiredFiles) {
+    const fileInput = document.getElementById(fileId);
+    if (!fileInput || fileInput.files.length === 0) {
+      alert(`❌ Please upload required document: ${fileId}`);
+      return;
+    }
+  }
+
+  // 🔍 Collect product-specific details
+  const productDetails = collectProductDetails(category);
+
+  // ✅ Show loading
+  const postBtn = document.getElementById("postBtn");
+  const originalText = postBtn.innerText;
+  postBtn.innerText = "⏳ Posting...";
+  postBtn.disabled = true;
+
+  // Create FormData for file uploads
+  const formData = new FormData();
+  formData.append("user_id", user.id);
+  formData.append("offer", offerText);
+  formData.append("need", needText);
+  formData.append("image", imageText);
+  formData.append("category", category);
+  
+  // Append product details as JSON
+  formData.append("productDetails", JSON.stringify(productDetails));
+  
+  // Add certificate if exists
+  if (document.getElementById("certificateFile").files.length > 0) {
+    formData.append("certificate", document.getElementById("certificateFile").files[0]);
+  }
+  
+  // Add proof photos if exist
+  const proofPhotos = document.getElementById("proofPhotosFile").files;
+  for (let i = 0; i < proofPhotos.length; i++) {
+    formData.append("proofPhotos", proofPhotos[i]);
+  }
+  
+  // Add insurance if exists
+  if (document.getElementById("insuranceFile").files.length > 0) {
+    formData.append("insurance", document.getElementById("insuranceFile").files[0]);
+  }
+  
+  // Add registration if exists
+  if (document.getElementById("registrationFile").files.length > 0) {
+    formData.append("registration", document.getElementById("registrationFile").files[0]);
+  }
+  
+  // Add ownership proof if exists
+  if (document.getElementById("ownershipFile").files.length > 0) {
+    formData.append("ownership", document.getElementById("ownershipFile").files[0]);
+  }
+
+  console.log("📋 Product Details:", productDetails);
+
+  // 📤 Send to backend with files
+  fetch("http://localhost:3000/post", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      // ✅ Success
+      alert("✅ " + data.message);
+      document.getElementById("offer").value = "";
+      document.getElementById("need").value = "";
+      document.getElementById("image").value = "";
+      document.getElementById("category").value = "";
+      document.getElementById("certificateFile").value = "";
+      document.getElementById("proofPhotosFile").value = "";
+      document.getElementById("insuranceFile").value = "";
+      document.getElementById("registrationFile").value = "";
+      document.getElementById("ownershipFile").value = "";
+      document.getElementById("fileRequirementsContainer").style.display = "none";
+      document.getElementById("productDetailsContainer").style.display = "none";
+      updateFileRequirements();
+      
+      const page = getCategoryFromNeed(needText);
+      setTimeout(() => {
+        window.location.href = page + ".html";
+      }, 500);
+    } else if (data.error) {
+      // ❌ Error
+      alert("❌ " + data.error);
+      postBtn.innerText = originalText;
+      postBtn.disabled = false;
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Error posting offer: " + err.message);
+    postBtn.innerText = originalText;
+    postBtn.disabled = false;
+  });
+}
+
+/* 🔍 COLLECT PRODUCT-SPECIFIC DETAILS */
+function collectProductDetails(category) {
+  const details = { category };
+  
+  // Get all product detail fields
+  const detailsFields = document.querySelectorAll('[id^="productDetail_"]');
+  detailsFields.forEach(field => {
+    const key = field.id.replace('productDetail_', '');
+    const value = field.value.trim();
+    if (value) {
+      details[key] = value;
+    }
+  });
+  
+  return details;
+}
+
+/* 📋 GET REQUIRED FILES FOR CATEGORY */
+function getRequiredFiles(category) {
+  const requirements = {
+    "watch": ["certificateFile", "proofPhotosFile"],
+    "bike": ["insuranceFile", "registrationFile", "proofPhotosFile"],
+    "car": ["insuranceFile", "registrationFile", "proofPhotosFile"],
+    "books": ["proofPhotosFile"],
+    "fashion": ["proofPhotosFile"],
+    "gadgets": ["certificateFile", "proofPhotosFile"],
+    "land": ["ownershipFile", "registrationFile"],
+    "jewelry": ["certificateFile", "proofPhotosFile"],
+    "other": []
+  };
+  
+  return requirements[category] || [];
+}
+
+/* 🔍 SEARCH OFFERS */
+function searchOffers() {
+  const query = document.getElementById("searchInput").value.trim();
+  
+  if (!query) {
+    alert("Please enter a search term");
+    return;
+  }
+
+  // Redirect to related_offer.html with search query
+  window.location.href = "related_offer.html?search=" + encodeURIComponent(query);
+}
+
+/* 🔄 EXCHANGE WITH USER - REDIRECT TO EXCHANGE PAGE */
+function exchangeWithUser(userId, userName, userEmail, offer, need) {
+  // Redirect to exchange.html with parameters
+  const params = new URLSearchParams({
+    toUserId: userId,
+    toUserName: userName || 'User #' + userId,
+    toUserEmail: userEmail || 'N/A',
+    theirOffer: offer,
+    theirNeed: need
+  });
+  window.location.href = `exchange.html?${params.toString()}`;
+}
+</script>
+
+<script>
+/* 🌌 BACKGROUND + CURSOR EFFECTS + WATER + SNOWFALL */
+document.addEventListener("DOMContentLoaded", () => {
+  const bg = document.getElementById("bg-container");
+  const symbols = ["⭐","🌿","📜","🪙","⚙️","🌌"];
+
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = Math.random() * 100 + "%";
+    bg.appendChild(p);
+
+    gsap.to(p, {
+      x: "random(-250,250)",
+      y: "random(-250,250)",
+      rotation: "random(-360,360)",
+      duration: Math.random() * 12 + 8,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+  }
+
+  const star = document.getElementById("cursor-star");
+  
+  /* 💧 WATER RIPPLE EFFECT ON MOUSE MOVE */
+  let lastRippleTime = 0;
+  document.addEventListener("mousemove", e => {
+    star.style.left = e.clientX + "px";
+    star.style.top = e.clientY + "px";
+    star.style.opacity = 1;
+    
+    // Create water ripple every 150ms
+    if (Date.now() - lastRippleTime > 150) {
+      createWaterRipple(e.clientX, e.clientY);
+      lastRippleTime = Date.now();
+    }
+  });
+  
+  /* 💧 CREATE RIPPLE */
+  function createWaterRipple(x, y) {
+    const ripple = document.createElement("div");
+    ripple.className = "water-ripple";
+    ripple.style.left = (x - 10) + "px";
+    ripple.style.top = (y - 10) + "px";
+    document.body.appendChild(ripple);
+    
+    setTimeout(() => ripple.remove(), 800);
+  }
+  
+  /* ❄️ SNOWFALL ON BUTTON CLICK */
+  function createSnowflakes() {
+    for (let i = 0; i < 30; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.className = "snowflake";
+      snowflake.textContent = "❄";
+      snowflake.style.left = Math.random() * window.innerWidth + "px";
+      snowflake.style.top = "-20px";
+      snowflake.style.animationDuration = (Math.random() * 3 + 3) + "s";
+      snowflake.style.color = `hsl(${Math.random() * 60 + 180}, 100%, ${Math.random() * 30 + 60}%)`;
+      document.body.appendChild(snowflake);
+      
+      setTimeout(() => snowflake.remove(), (Math.random() * 3 + 3) * 1000);
+    }
+  }
+  
+  /* 🔘 ADD CLICK LISTENERS TO ALL BUTTONS */
+  const buttons = document.querySelectorAll("button, .btn, a[href$='.html']");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      createSnowflakes();
+      
+      // Create ripple on click
+      const rect = btn.getBoundingClientRect();
+      createWaterRipple(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+  });
+});
+</script>
+
+<!-- FOOTER -->
+<footer style="background: rgba(20, 20, 40, 0.95); border-top: 2px solid rgba(100, 200, 255, 0.3); margin-top: 80px; padding: 50px 0; color: white;">
+  <div class="container">
+    <!-- Greeting Section -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <h3 class="text-center mb-3">🙏 Thank You for Joining Our Community!</h3>
+        <p class="text-center" style="font-size: 1.1rem; color: rgba(255,255,255,0.8);">
+          We're thrilled to have you as part of the Barter System family. Together, we're building a sustainable marketplace 
+          where everyone can exchange fairly and connect meaningfully.
+        </p>
+      </div>
+    </div>
+
+    <!-- Contact & Links Section -->
+    <div class="row g-4">
+      <!-- Contact Information -->
+      <div class="col-md-4">
+        <div class="p-4" style="background: rgba(100, 200, 255, 0.08); border: 1px solid rgba(100, 200, 255, 0.25); border-radius: 15px;">
+          <h5 class="mb-3">📞 Contact Us</h5>
+          <ul style="list-style: none; padding: 0;">
+            <li class="mb-2">
+              <span style="color: rgba(100, 200, 255, 0.8);">📧 Email:</span><br>
+              <a href="mailto:info@bartersystem.com" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">info@bartersystem.com</a>
+            </li>
+            <li class="mb-2">
+              <span style="color: rgba(100, 200, 255, 0.8);">📱 Phone:</span><br>
+              <a href="tel:+1234567890" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">+1 (234) 567-890</a>
+            </li>
+            <li class="mb-2">
+              <span style="color: rgba(100, 200, 255, 0.8);">📍 Address:</span><br>
+              <span style="color: rgba(255,255,255,0.8);">123 Barter Street, Trading City, TC 12345</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4">
+        <div class="p-4" style="background: rgba(100, 200, 255, 0.08); border: 1px solid rgba(100, 200, 255, 0.25); border-radius: 15px;">
+          <h5 class="mb-3">🔗 Quick Links</h5>
+          <ul style="list-style: none; padding: 0;">
+            <li class="mb-2"><a href="dashboard.html" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">🏠 Home</a></li>
+            <li class="mb-2"><a href="fashion.html" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">👗 Categories</a></li>
+            <li class="mb-2"><a href="#" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">❓ FAQ</a></li>
+            <li class="mb-2"><a href="#" style="color: rgba(100, 200, 255, 0.9); text-decoration: none;">📜 Terms & Conditions</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Follow Us -->
+      <div class="col-md-4">
+        <div class="p-4" style="background: rgba(100, 200, 255, 0.08); border: 1px solid rgba(100, 200, 255, 0.25); border-radius: 15px;">
+          <h5 class="mb-3">🌐 Follow Us</h5>
+          <div class="d-flex gap-3 mb-3">
+            <a href="#" style="font-size: 1.5rem; text-decoration: none;">📘 Facebook</a>
+            <a href="#" style="font-size: 1.5rem; text-decoration: none;">🐦 Twitter</a>
+            <a href="#" style="font-size: 1.5rem; text-decoration: none;">📸 Instagram</a>
+          </div>
+          <p style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Stay connected with our community for latest updates and offers!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="row mt-5 pt-4" style="border-top: 1px solid rgba(100, 200, 255, 0.2);">
+      <div class="col-12">
+        <p class="text-center" style="color: rgba(255,255,255,0.6); margin: 0;">
+          <small>💚 Made with love by the Barter Community | © 2026 Barter System. All rights reserved.</small>
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Include Chatbot Script -->
+<script src="chatbot.js"></script>
+
+</body>
+</html>

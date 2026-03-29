@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard | Barter System</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fb;padding:20px}
+    .card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.06);margin-bottom:16px}
+    input,button{padding:8px 10px;font-size:14px}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border:1px solid #e8e8e8;text-align:left;font-size:13px}
+    .flex{display:flex;gap:8px}
+    .tabs{display:flex;gap:8px;margin-bottom:12px}
+    .tab{padding:8px 12px;border-radius:6px;background:#e9eef8;cursor:pointer}
+    .tab.active{background:#2b6cb0;color:#fff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Admin Login</h2>
+    <div class="flex">
+      <input id="adminEmail" placeholder="admin email" />
+      <input id="adminPass" placeholder="password" type="password" />
+      <button id="loginBtn">Login</button>
+      <button id="logoutBtn" style="display:none">Logout</button>
+    </div>
+    <div id="loginMsg" style="margin-top:8px;color:#666"></div>
+  </div>
+
+  <div id="dashboard" style="display:none">
+    <div class="card">
+      <h3>Admin Dashboard</h3>
+      <div class="tabs">
+        <div class="tab active" data-tab="offers">Offers</div>
+        <div class="tab" data-tab="exchanges">Exchanges</div>
+      </div>
+      <div id="content"></div>
+    </div>
+  </div>
+
+<script>
+const API_ROOT = location.origin.replace(/:\d+$/, ':3000');
+let adminToken = localStorage.getItem('adminToken') || null;
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginMsg = document.getElementById('loginMsg');
+const dashboard = document.getElementById('dashboard');
+const content = document.getElementById('content');
+
+function setLoggedIn(token){
+  adminToken = token;
+  if(token){
+    localStorage.setItem('adminToken', token);
+    loginMsg.textContent = 'Logged in';
+    loginBtn.style.display='none'; logoutBtn.style.display='inline-block';
+    document.getElementById('adminEmail').style.display='none';
+    document.getElementById('adminPass').style.display='none';
+    dashboard.style.display='block';
+    loadOffers();
+  } else {
+    localStorage.removeItem('adminToken');
+    loginBtn.style.display='inline-block'; logoutBtn.style.display='none';
+    document.getElementById('adminEmail').style.display='inline-block';
+    document.getElementById('adminPass').style.display='inline-block';
+    dashboard.style.display='none';
+  }
+}
+
+loginBtn.addEventListener('click', ()=>{
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPass').value.trim();
+  if(!email||!password){ loginMsg.textContent='Provide credentials'; return; }
+  fetch(API_ROOT + '/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password}) })
+    .then(r=>r.json()).then(j=>{
+      if(j.token){ setLoggedIn(j.token); loginMsg.textContent=''; } else { loginMsg.textContent = j.error || 'Login failed'; }
+    }).catch(err=>{ loginMsg.textContent='Error connecting to backend'; console.error(err); });
+});
+
+logoutBtn.addEventListener('click', ()=>{ setLoggedIn(null); });
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', (e)=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  e.target.classList.add('active');
+  if(e.target.dataset.tab==='offers') loadOffers(); else loadExchanges();
+}));
+
+function authFetch(path, opts={}){
+  opts.headers = opts.headers || {};
+  opts.headers['x-admin-token'] = adminToken;
+  return fetch(API_ROOT + path, opts).then(r=>r.json());
+}
+
+function loadOffers(){
+  content.innerHTML = '<p>Loading offers...</p>';
+  authFetch('/admin/offers').then(data=>{
+    if(data.error){ content.innerHTML = '<p style="color:red">'+data.error+'</p>'; return; }
+    if(!Array.isArray(data) || data.length===0){ content.innerHTML = '<p>No offers</p>'; return; }
+    let html = '<table><thead><tr><th>ID</th><th>Owner</th><th>Offer</th><th>Need</th><th>Category</th><th>Files</th><th>Posted</th></tr></thead><tbody>';
+    data.forEach(r=>{
+      html += `<tr><td>${r.id}</td><td>${r.owner_name || r.user_id || 'N/A'}<br>${r.owner_email||''}</td><td>${escapeHtml(r.offer)}</td><td>${escapeHtml(r.need)}</td><td>${r.category||''}</td><td>${renderFiles(r)}</td><td>${r.created_at}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    content.innerHTML = html;
+  }).catch(err=>{ content.innerHTML = '<p style="color:red">Error loading offers</p>'; console.error(err); });
+}
+
+function loadExchanges(){
+  content.innerHTML = '<p>Loading exchanges...</p>';
+  authFetch('/admin/exchanges').then(data=>{
+    if(data.error){ content.innerHTML = '<p style="color:red">'+data.error+'</p>'; return; }
+    if(!Array.isArray(data) || data.length===0){ content.innerHTML = '<p>No exchanges</p>'; return; }
+    let html = '<table><thead><tr><th>ID</th><th>From</th><th>To</th><th>Offering</th><th>Need</th><th>Date</th><th>Place</th><th>Status</th></tr></thead><tbody>';
+    data.forEach(e=>{
+      html += `<tr><td>${e.id}</td><td>${e.from_name||e.from_user_name} <br> ${e.from_email||e.from_user_email}</td><td>${e.to_name||e.to_user_name}<br>${e.to_email||e.to_user_email}</td><td>${escapeHtml(e.what_you_offering)}</td><td>${escapeHtml(e.what_you_need)}</td><td>${e.exchange_date}</td><td>${escapeHtml(e.exchange_place)}</td><td>${e.status}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    content.innerHTML = html;
+  }).catch(err=>{ content.innerHTML = '<p style="color:red">Error loading exchanges</p>'; console.error(err); });
+}
+
+function renderFiles(r){
+  const files = [];
+  if(r.certificate) files.push(`<a href="${API_ROOT.replace(':3000','')}/front end/../backend/uploads/${r.certificate}" target="_blank">cert</a>`);
+  if(r.proof_photos) files.push('photos');
+  if(r.insurance) files.push('ins');
+  if(r.registration) files.push('reg');
+  if(r.ownership) files.push('own');
+  return files.join(', ');
+}
+
+function escapeHtml(s){ if(!s) return ''; return s.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Initialize state
+if(adminToken){ setLoggedIn(adminToken); }
+</script>
+</body>
+</html>

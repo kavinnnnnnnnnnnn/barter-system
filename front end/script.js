@@ -1,83 +1,68 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* -------- REGISTER -------- */
-  window.registerUser = function(e){
+  /* =====================
+     🔐 REGISTER (API)
+  ===================== */
+  window.registerUser = function (e) {
     e.preventDefault();
-    const email = regEmail.value.trim();
-    const pass = regPassword.value.trim();
 
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-    if(users[email]){ alert("User already exists"); return; }
-
-    users[email] = pass;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Registration successful");
-    location.href = "login.html";
+    fetch("http://localhost:3000/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: regEmail.value.trim(),
+        password: regPassword.value.trim()
+      })
+    })
+    .then(res => res.text())
+    .then(msg => {
+      alert(msg);
+      if (msg.includes("success")) {
+        location.href = "login.html";
+      }
+    });
   };
 
-  /* -------- LOGIN -------- */
-  window.loginUser = function(e){
+  /* =====================
+     🔐 LOGIN (API)
+  ===================== */
+  window.loginUser = function (e) {
     e.preventDefault();
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-    if(users[loginEmail.value] !== loginPassword.value){
-      alert("Invalid credentials"); return;
-    }
-    localStorage.setItem("loggedInUser", loginEmail.value);
-    location.href = "index.html";
+
+    fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: loginEmail.value.trim(),
+        password: loginPassword.value.trim()
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Invalid login");
+      return res.json();
+    })
+    .then(user => {
+      localStorage.setItem("user", JSON.stringify(user));
+      location.href = "dashboard.html";
+    })
+    .catch(() => alert("Invalid email or password"));
   };
 
-  /* -------- AUTH CHECK -------- */
-  window.checkLogin = function(){
-    if(!localStorage.getItem("loggedInUser")){
+  /* =====================
+     🔐 AUTH CHECK
+  ===================== */
+  window.checkLogin = function () {
+    if (!localStorage.getItem("user")) {
       location.href = "login.html";
     }
   };
 
-  /* -------- LOGOUT -------- */
-  window.logout = function(){
-    localStorage.removeItem("loggedInUser");
+  /* =====================
+     🚪 LOGOUT
+  ===================== */
+  window.logout = function () {
+    localStorage.removeItem("user");
     location.href = "login.html";
-  };
-
-  /* -------- POST OFFER -------- */
-  const form = document.getElementById("barterForm");
-  if(form){
-    form.addEventListener("submit", e=>{
-      e.preventDefault();
-
-      let offers = JSON.parse(localStorage.getItem("barterOffers")) || [];
-
-      offers.push({
-        owner: localStorage.getItem("loggedInUser"),
-        offer: offer.value.trim(),
-        need: need.value.trim(),
-        image: image.value.trim()
-      });
-
-      localStorage.setItem("barterOffers", JSON.stringify(offers));
-      form.reset();
-      loadOffers();
-    });
-  }
-
-  /* -------- LOAD OFFERS -------- */
-  window.loadOffers = function(){
-    let offers = JSON.parse(localStorage.getItem("barterOffers")) || [];
-    let box = document.getElementById("barterCards");
-    if(!box) return;
-
-    box.innerHTML = "";
-    offers.forEach(o=>{
-      let img = o.image || "https://via.placeholder.com/300x200?text=No+Image";
-      box.innerHTML += `
-        <div class="card">
-          <img src="${img}" 
-               onerror="this.src='https://via.placeholder.com/300x200?text=Invalid+Image'">
-          <p><b>Owner:</b> ${o.owner}</p>
-          <p><b>Offers:</b> ${o.offer}</p>
-          <p><b>Needs:</b> ${o.need}</p>
-        </div>`;
-    });
   };
 
 });

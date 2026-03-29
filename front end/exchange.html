@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exchange Details | Barter System</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #0a0e27 0%, #1a0033 50%, #0d1b2a 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 900px;
+      margin-top: 40px;
+    }
+
+    .card {
+      background: rgba(30, 30, 48, 0.9);
+      border: 2px solid rgba(100, 200, 255, 0.3);
+      border-radius: 15px;
+      color: white;
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0.2);
+    }
+
+    .user-card {
+      background: rgba(100, 200, 255, 0.08);
+      border: 2px solid rgba(100, 200, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .user-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(100, 200, 255, 0.4);
+    }
+
+    .exchange-arrow {
+      font-size: 2rem;
+      color: rgba(100, 200, 255, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .form-section {
+      background: rgba(100, 200, 255, 0.08);
+      border: 2px solid rgba(100, 200, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .form-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-control, .form-control:focus {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(100, 200, 255, 0.3);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(100, 200, 255, 0.6);
+      box-shadow: 0 0 15px rgba(100, 200, 255, 0.3);
+      color: white;
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-exchange {
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.6), rgba(30, 144, 255, 0.6));
+      border: 2px solid rgba(100, 200, 255, 0.5);
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 12px 40px;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .btn-exchange:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 30px rgba(100, 200, 255, 0.6);
+      background: linear-gradient(135deg, rgba(100, 200, 255, 0.8), rgba(30, 144, 255, 0.8));
+      color: white;
+    }
+
+    .btn-exchange:active {
+      transform: translateY(-1px);
+    }
+
+    .btn-back {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+      color: rgba(100, 200, 255, 0.9);
+    }
+
+    .info-item {
+      margin-bottom: 15px;
+    }
+
+    .info-label {
+      color: rgba(100, 200, 255, 0.8);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .info-value {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-top: 5px;
+      word-break: break-word;
+    }
+
+    /* 🎬 ENTRANCE ANIMATIONS */
+    @keyframes dropFromTop {
+      0% {
+        opacity: 0;
+        transform: translateY(-80px) rotateX(90deg) scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg) scale(1);
+      }
+    }
+
+    @keyframes dropFromTopWithBounce {
+      0% {
+        opacity: 0;
+        transform: translateY(-100px) rotateX(90deg) scale(0.7);
+      }
+      60% {
+        transform: translateY(10px) rotateX(0deg) scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg) scale(1);
+      }
+    }
+
+    h1 {
+      animation: dropFromTopWithBounce 1s ease-out;
+    }
+
+    .exchange-container {
+      animation: dropFromTop 1.2s ease-out;
+    }
+
+    .form-section {
+      animation: dropFromTopWithBounce 1.4s ease-out;
+    }
+
+    .button-group {
+      animation: dropFromTop 1.6s ease-out;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(100, 200, 255, 0.3);
+      border-top: 3px solid rgba(100, 200, 255, 0.8);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .error {
+      color: #ff6b6b;
+      padding: 15px;
+      background: rgba(255, 107, 107, 0.1);
+      border: 1px solid rgba(255, 107, 107, 0.3);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .success {
+      color: #51cf66;
+      padding: 15px;
+      background: rgba(81, 207, 102, 0.1);
+      border: 1px solid rgba(81, 207, 102, 0.3);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  
+  <a href="javascript:history.back()" class="btn-back">⬅ Back</a>
+
+  <h1 class="text-center mb-5">💱 Exchange Request Details</h1>
+
+  <div class="error" id="errorMsg"></div>
+  <div class="success" id="successMsg"></div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Processing your exchange request...</p>
+  </div>
+
+  <div id="content">
+    <!-- USER COMPARISON SECTION -->
+    <div class="exchange-container">
+      <div class="row g-3">
+        <!-- FROM USER (Current User) -->
+        <div class="col-md-5">
+          <div class="user-card">
+            <h5 class="text-center mb-4" style="color: rgba(100, 200, 255, 0.9);">👤 You</h5>
+            <div class="info-item">
+              <div class="info-label">Name</div>
+              <div class="info-value" id="fromUserName">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value" id="fromUserEmail">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">You Are Offering</div>
+              <div class="info-value text-warning" id="fromUserOffering">Loading...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ARROW -->
+        <div class="col-md-2">
+          <div class="exchange-arrow">
+            <span>⇄</span>
+          </div>
+        </div>
+
+        <!-- TO USER (Other User) -->
+        <div class="col-md-5">
+          <div class="user-card">
+            <h5 class="text-center mb-4" style="color: rgba(100, 200, 255, 0.9);">🤝 Exchange With</h5>
+            <div class="info-item">
+              <div class="info-label">Name</div>
+              <div class="info-value" id="toUserName">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Email</div>
+              <div class="info-value" id="toUserEmail">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">They Are Offering</div>
+              <div class="info-value text-info" id="toUserOffering">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXCHANGE DETAILS FORM -->
+    <div class="form-section">
+      <h4 class="mb-4">📋 Exchange Details</h4>
+
+      <!-- What You Need -->
+      <div class="mb-4">
+        <label class="form-label">🔍 What You Need From Them</label>
+        <input type="text" class="form-control" id="whatYouNeed" placeholder="e.g., Laptop, Bicycle, etc." readonly>
+        <small class="text-muted d-block mt-2">Auto-filled from their offer</small>
+      </div>
+
+      <!-- Exchange Date -->
+      <div class="mb-4">
+        <label class="form-label">📅 Preferred Exchange Date</label>
+        <input type="date" class="form-control" id="exchangeDate" required>
+      </div>
+
+      <!-- Exchange Place -->
+      <div class="mb-4">
+        <label class="form-label">📍 Exchange Location</label>
+        <input type="text" class="form-control" id="exchangePlace" placeholder="e.g., Coffee Shop, Park, Street Name, City" required>
+      </div>
+
+      <!-- Additional Notes -->
+      <div class="mb-4">
+        <label class="form-label">💬 Additional Notes (Optional)</label>
+        <textarea class="form-control" id="notes" rows="4" placeholder="Add any special requirements or notes about the exchange..."></textarea>
+      </div>
+
+      <!-- VERIFICATION & DOCUMENTATION SECTION -->
+      <!-- Terms Checkbox -->
+      <div class="mb-4">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="termsAgreed" required style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="termsAgreed" style="margin: 0; cursor: pointer; color: rgba(255, 255, 255, 0.9);">
+            ✓ I verify that all information provided is authentic and accurate
+          </label>
+        </div>
+        <small class="text-muted d-block mt-2" style="margin-left: 28px;">Providing false information may result in account suspension</small>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="button-group d-flex gap-3 justify-content-center mt-5">
+        <button onclick="submitExchange()" class="btn-exchange">
+          ✓ Confirm Exchange Request
+        </button>
+        <button onclick="window.history.back()" class="btn btn-outline-secondary" style="padding: 12px 30px; border-radius: 12px; font-weight: 600;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* 🔐 LOGIN PROTECTION */
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user) window.location.href = "login.html";
+
+  /* 📝 LOAD EXCHANGE DATA */
+  let toUserData = {}; // Store other user's data globally
+  
+  function loadExchangeData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const toUserId = urlParams.get('toUserId');
+    const toUserName = urlParams.get('toUserName');
+    const toUserEmail = urlParams.get('toUserEmail');
+    const theirOffer = urlParams.get('theirOffer');
+    const theirNeed = urlParams.get('theirNeed');
+
+    if (!toUserId || !theirOffer) {
+      document.getElementById('content').innerHTML = '<p class="text-danger text-center">Invalid exchange request. Please go back and try again.</p>';
+      return;
+    }
+
+    // Fill FROM USER (Current User / You)
+    document.getElementById('fromUserName').textContent = user.name || user.email;
+    document.getElementById('fromUserEmail').textContent = user.email;
+    document.getElementById('fromUserOffering').textContent = theirNeed || 'Your items';
+
+    // Fetch OTHER USER (Offerer) details from backend - ALWAYS fetch for accurate email
+    fetch(`http://localhost:3000/user/${toUserId}`)
+      .then(res => res.json())
+      .then(userData => {
+        if (userData && userData.id && userData.email) {
+          // Store user data for later submission with BACKEND EMAIL
+          toUserData = {
+            id: userData.id,
+            name: userData.name || userData.email || 'User #' + toUserId,
+            email: userData.email  // ✅ USE BACKEND EMAIL (most accurate)
+          };
+          document.getElementById('toUserName').textContent = toUserData.name;
+          document.getElementById('toUserEmail').textContent = toUserData.email;  // ✅ Display offerer email
+          console.log('✅ Offerer email fetched from backend:', toUserData.email);
+        } else {
+          // Fallback to URL parameters if backend doesn't return email
+          toUserData = {
+            id: toUserId,
+            name: toUserName || 'User #' + toUserId,
+            email: toUserEmail || 'N/A'
+          };
+          document.getElementById('toUserName').textContent = toUserData.name;
+          document.getElementById('toUserEmail').textContent = toUserData.email;
+          console.warn('⚠️ Using URL parameter email:', toUserData.email);
+        }
+      })
+      .catch(err => {
+        console.error('❌ Could not fetch user details from backend:', err);
+        // Fallback to URL parameters
+        toUserData = {
+          id: toUserId,
+          name: toUserName || 'User #' + toUserId,
+          email: toUserEmail || 'N/A'
+        };
+        document.getElementById('toUserName').textContent = toUserData.name;
+        document.getElementById('toUserEmail').textContent = toUserData.email;
+        console.warn('⚠️ Using URL parameter email as fallback:', toUserData.email);
+      });
+
+    document.getElementById('toUserOffering').textContent = theirOffer;
+
+    // Fill What You Need
+    document.getElementById('whatYouNeed').value = theirOffer;
+
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('exchangeDate').min = today;
+  }
+
+  // 🌍 INTERNATIONAL PROOF DROPDOWN HANDLER
+  document.addEventListener('DOMContentLoaded', function() {
+    const intlProofTypeSelect = document.getElementById('intlProofType');
+    const intlProofUploadDiv = document.getElementById('intlProofUploadDiv');
+    
+    if (intlProofTypeSelect) {
+      intlProofTypeSelect.addEventListener('change', function() {
+        if (this.value) {
+          intlProofUploadDiv.style.display = 'block';
+          document.getElementById('intlProof').required = true;
+        } else {
+          intlProofUploadDiv.style.display = 'none';
+          document.getElementById('intlProof').required = false;
+        }
+      });
+    }
+  });
+
+  /* 📤 SUBMIT EXCHANGE */
+  function submitExchange() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const toUserId = urlParams.get('toUserId');
+    const theirOffer = urlParams.get('theirOffer');
+    const theirNeed = urlParams.get('theirNeed');
+
+    const whatYouNeed = document.getElementById('whatYouNeed').value.trim();
+    const exchangeDate = document.getElementById('exchangeDate').value.trim();
+    const exchangePlace = document.getElementById('exchangePlace').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+    
+    const termsAgreed = document.getElementById('termsAgreed').checked;
+
+    // Validation
+    if (!exchangeDate) {
+      showError('Please select an exchange date');
+      return;
+    }
+    if (!exchangePlace) {
+      showError('Please enter the exchange location');
+      return;
+    }
+    if (!termsAgreed) {
+      showError('Please agree to the terms and verify your information');
+      return;
+    }
+
+    // 🔴 CRITICAL: Validate both emails before submission
+    const fromUserEmail = user.email;
+    const toUserEmail = toUserData.email || document.getElementById('toUserEmail').textContent;
+
+    if (!fromUserEmail || fromUserEmail === 'N/A') {
+      showError('❌ Your email is missing. Please log in again.');
+      return;
+    }
+
+    if (!toUserEmail || toUserEmail === 'N/A' || toUserEmail === 'Loading...') {
+      showError('❌ Unable to get offerer\'s email. Please refresh the page and try again.');
+      return;
+    }
+
+    // Show loading
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('content').style.opacity = '0.5';
+    document.getElementById('content').style.pointerEvents = 'none';
+
+    // 📧 Prepare exchange data
+    const exchangeData = {
+      from_user_id: user.id,
+      from_user_name: user.name || user.email,
+      from_user_email: fromUserEmail,
+      to_user_id: toUserData.id || toUserId,
+      to_user_name: toUserData.name || document.getElementById('toUserName').textContent,
+      to_user_email: toUserEmail,
+      what_you_offering: theirNeed || 'To be discussed',
+      what_you_need: whatYouNeed,
+      exchange_date: exchangeDate,
+      exchange_place: exchangePlace,
+      notes: notes,
+      terms_agreed: true,
+      status: 'pending'
+    };
+
+    console.log('📧 Sending exchange request with emails:');
+    console.log('   From (You):', exchangeData.from_user_email);
+    console.log('   To (Offerer):', exchangeData.to_user_email);
+    console.log('📱 Phone:', exchangeData.phone_number);
+    console.log('🆔 Aadhar: Uploaded');
+    console.log('🏦 PAN: Uploaded');
+    if (intlProofType) {
+      console.log('🌍 International Proof:', exchangeData.intl_proof_type);
+    }
+
+    // Send to backend
+    fetch('http://localhost:3000/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(exchangeData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.opacity = '1';
+      document.getElementById('content').style.pointerEvents = 'auto';
+
+      if (data.success || data.message) {
+        console.log('✅ Exchange request successful!');
+        console.log('📊 Exchange Details Saved:');
+        console.log('   ID:', data.exchange_id);
+        console.log('   From:', exchangeData.from_user_name, `(${exchangeData.from_user_email})`);
+        console.log('   To:', exchangeData.to_user_name, `(${exchangeData.to_user_email})`);
+        console.log('   Date:', exchangeData.exchange_date);
+        console.log('   Location:', exchangeData.exchange_place);
+        console.log('   Email Status:', data.email_status);
+        
+        showSuccess('Exchange request created successfully! 🎉');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 3000);
+      } else {
+        showError('Failed to submit exchange request. Please try again.');
+      }
+    })
+    .catch(err => {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.opacity = '1';
+      document.getElementById('content').style.pointerEvents = 'auto';
+      console.error('❌ Error:', err);
+      showError('Error submitting exchange request. Please check your connection.');
+    });
+  }
+
+  /* 🔴 SHOW ERROR */
+  function showError(msg) {
+    const errorDiv = document.getElementById('errorMsg');
+    errorDiv.textContent = '❌ ' + msg;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+      errorDiv.style.display = 'none';
+    }, 5000);
+  }
+
+  /* 🟢 SHOW SUCCESS */
+  function showSuccess(msg) {
+    const successDiv = document.getElementById('successMsg');
+    successDiv.innerHTML = `
+      <div style="background: linear-gradient(135deg, #00d084, #00a86b); padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 5px 20px rgba(0, 208, 132, 0.4);">
+        <div style="font-size: 3rem; margin-bottom: 15px;">✅</div>
+        <h3 style="margin: 15px 0; font-size: 1.3rem; color: white;">${msg}</h3>
+        <p style="margin: 10px 0; color: rgba(255,255,255,0.9); font-size: 0.95rem;">Your exchange request has been saved successfully!</p>
+        <p style="margin: 15px 0; color: rgba(255,255,255,0.85); font-size: 0.9rem;">📧 <strong>Notification emails will be sent to both users</strong></p>
+        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 15px 0;">
+        <p style="margin: 10px 0; color: rgba(255,255,255,0.8); font-size: 0.85rem;">Redirecting to dashboard in 3 seconds...</p>
+      </div>
+    `;
+    successDiv.style.display = 'block';
+  }
+
+  // Load data when page loads
+  loadExchangeData();
+</script>
+
+</body>
+</html>

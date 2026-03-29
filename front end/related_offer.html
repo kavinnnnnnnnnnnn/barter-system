@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Related Offers | Barter System</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #0a0e27 0%, #1a0033 50%, #0d1b2a 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+    
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 0 30px rgba(100, 200, 255, 0.5), 0 0 60px rgba(30, 144, 255, 0.3);
+      background: #252525;
+    }
+    
+    .card img {
+      height: 160px;
+      object-fit: cover;
+      border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    
+    .card img:hover {
+      transform: scale(1.08);
+    }
+
+    #bg-container {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      font-size: 18px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* 💧 WATER RIPPLE EFFECT */
+    .water-ripple {
+      position: fixed;
+      border: 2px solid rgba(100, 200, 255, 0.6);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 999;
+      animation: ripple 0.8s ease-out;
+    }
+
+    @keyframes ripple {
+      0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+      }
+      100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+      }
+    }
+
+    /* ❄️ SNOWFLAKE */
+    .snowflake {
+      position: fixed;
+      font-size: 20px;
+      z-index: 999;
+      pointer-events: none;
+      animation: snowfall linear;
+    }
+
+    @keyframes snowfall {
+      0% {
+        opacity: 1;
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) translateX(50px) rotate(360deg);
+      }
+    }
+
+    /* 🔘 BUTTON HOVER */
+    .btn {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(100, 200, 255, 0.4);
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="bg-container"></div>
+
+<script>
+/* 🔐 LOGIN PROTECTION */
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) window.location.href = "login.html";
+</script>
+
+<div class="container mt-4">
+
+  <h2 class="text-center mb-3" id="pageTitle">Related Offers</h2>
+  <a href="dashboard.html" class="btn btn-warning mb-3">⬅ Back to Dashboard</a>
+
+  <!-- OFFERS GRID -->
+  <div id="products" class="row g-4 justify-content-center"></div>
+
+</div>
+
+<script>
+/* 📦 LOAD SEARCH RESULTS */
+function loadSearchResults() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchQuery = urlParams.get('search');
+
+  if (!searchQuery) {
+    document.getElementById("products").innerHTML = '<p class="text-center text-muted">No search query provided</p>';
+    return;
+  }
+
+  document.getElementById("pageTitle").textContent = `Search Results for: "${searchQuery}"`;
+
+  fetch("http://localhost:3000/products")
+    .then(res => res.json())
+    .then(data => {
+      const searchTerm = searchQuery.toLowerCase();
+      const filtered = data.filter(p => 
+        p.offer.toLowerCase().includes(searchTerm) || 
+        p.need.toLowerCase().includes(searchTerm)
+      );
+
+      const productsDiv = document.getElementById("products");
+      productsDiv.innerHTML = '';
+
+      if (filtered.length === 0) {
+        productsDiv.innerHTML = '<p class="text-center text-muted col-12">No offers found matching your search</p>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 col-lg-3';
+
+        col.innerHTML = `
+          <div class="card p-2 h-100">
+            <img src="${p.image || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="Product image" onerror="this.src='https://via.placeholder.com/300x200?text=Invalid+Image'">
+            <div class="card-body">
+              <h5 class="card-title">Offer: ${p.offer}</h5>
+              <p class="card-text">Need: ${p.need}</p>
+              <small class="text-muted">Category: ${p.category || 'Other'}</small>
+              <div class="d-grid gap-2 mt-3">
+                <button class="btn btn-success" onclick="exchangeWithUser(${p.user_id}, '${p.user_name || 'User'}', '${p.user_email || 'N/A'}', '${p.offer}', '${p.need}')">
+                  Exchange
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        productsDiv.appendChild(col);
+      });
+
+      gsap.from(productsDiv.children, { scale: 0.5, opacity: 0, stagger: 0.2 });
+    })
+    .catch(err => {
+      console.error('Error loading offers:', err);
+      document.getElementById("products").innerHTML = '<p class="text-danger text-center">Failed to load offers</p>';
+    });
+}
+
+/* 🔄 EXCHANGE WITH USER */
+function exchangeWithUser(userId, userName, userEmail, offer, need) {
+  // Redirect to exchange.html with parameters
+  const params = new URLSearchParams({
+    toUserId: userId,
+    toUserName: userName || 'User #' + userId,
+    toUserEmail: userEmail || 'N/A',
+    theirOffer: offer,
+    theirNeed: need
+  });
+  window.location.href = `exchange.html?${params.toString()}`;
+}
+
+/* 🚀 LOAD ON PAGE START */
+loadSearchResults();
+</script>
+
+<script>
+/* 🌌 BACKGROUND ANIMATION + WATER RIPPLE + SNOWFALL */
+document.addEventListener("DOMContentLoaded", () => {
+  const bg = document.getElementById("bg-container");
+  const symbols = ["⭐","🌿","📜","🪙","⚙️","🌌"];
+
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = Math.random() * 100 + "%";
+    p.style.top = Math.random() * 100 + "%";
+    bg.appendChild(p);
+
+    gsap.to(p, {
+      x: "random(-250,250)",
+      y: "random(-250,250)",
+      rotation: "random(-360,360)",
+      duration: Math.random() * 12 + 8,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+  }
+
+  /* 💧 WATER RIPPLE EFFECT ON MOUSE MOVE */
+  let lastRippleTime = 0;
+  document.addEventListener("mousemove", e => {
+    if (Date.now() - lastRippleTime > 150) {
+      createWaterRipple(e.clientX, e.clientY);
+      lastRippleTime = Date.now();
+    }
+  });
+
+  /* 💧 CREATE RIPPLE */
+  function createWaterRipple(x, y) {
+    const ripple = document.createElement("div");
+    ripple.className = "water-ripple";
+    ripple.style.left = (x - 10) + "px";
+    ripple.style.top = (y - 10) + "px";
+    document.body.appendChild(ripple);
+    
+    setTimeout(() => ripple.remove(), 800);
+  }
+
+  /* ❄️ SNOWFALL ON BUTTON CLICK */
+  function createSnowflakes() {
+    for (let i = 0; i < 30; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.className = "snowflake";
+      snowflake.textContent = "❄";
+      snowflake.style.left = Math.random() * window.innerWidth + "px";
+      snowflake.style.top = "-20px";
+      snowflake.style.animationDuration = (Math.random() * 3 + 3) + "s";
+      snowflake.style.color = `hsl(${Math.random() * 60 + 180}, 100%, ${Math.random() * 30 + 60}%)`;
+      document.body.appendChild(snowflake);
+      
+      setTimeout(() => snowflake.remove(), (Math.random() * 3 + 3) * 1000);
+    }
+  }
+
+  /* 🔘 ADD CLICK LISTENERS TO ALL BUTTONS */
+  const buttons = document.querySelectorAll("button, .btn, a[href$='.html']");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      createSnowflakes();
+      
+      const rect = btn.getBoundingClientRect();
+      createWaterRipple(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
